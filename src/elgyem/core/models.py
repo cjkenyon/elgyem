@@ -1,4 +1,5 @@
 from enum import Enum
+from pathlib import Path
 
 from pydantic import BaseModel
 
@@ -52,10 +53,19 @@ class EnergyType(Enum):
 
 
 class EnergyCard(Card):
-    cost: list[EnergyType]
+    cost: list[Energy]
     type: EnergyType
     text: str
 
 
 class Deck(BaseModel):
     cards: list[Card]
+
+    @classmethod
+    def from_jsonl(cls, path: str | Path) -> "Deck":
+        cards = []
+        with open(path) as f:
+            lines = f.readlines()
+            for line in lines:
+                cards.append(Card.model_validate_json(line))
+        return cls(cards=cards)
