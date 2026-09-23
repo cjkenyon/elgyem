@@ -1,7 +1,9 @@
+import random
 from enum import Enum
 from pathlib import Path
+from uuid import UUID, uuid4
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Energy(Enum):
@@ -25,6 +27,7 @@ class Attack(BaseModel):
 
 
 class Card(BaseModel):
+    uid: UUID = Field(default_factory=uuid4)
     name: str
 
 
@@ -58,8 +61,15 @@ class EnergyCard(Card):
     text: str
 
 
+class EmptyDeckError(Exception):
+    pass
+
+
 class Deck(BaseModel):
     cards: list[Card]
+
+    def __len__(self) -> int:
+        return len(self.cards)
 
     @classmethod
     def from_jsonl(cls, path: str | Path) -> "Deck":
@@ -69,3 +79,15 @@ class Deck(BaseModel):
             for line in lines:
                 cards.append(Card.model_validate_json(line))
         return cls(cards=cards)
+
+    def shuffle(self):
+        random.shuffle(self.cards)
+
+    def draw(self, count: int) -> list[Card]:
+
+        if count > len(self):
+            raise EmptyDeckError
+
+        cards_drawn = self.cards[0:count]
+        self.cards = self.cards[count:]
+        return cards_drawn
