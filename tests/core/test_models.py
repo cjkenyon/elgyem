@@ -1,6 +1,6 @@
 import pytest
 
-from elgyem.core.models import Deck, EmptyDeckError
+from elgyem.core.models import Card, Deck, EmptyDeckError
 
 
 @pytest.fixture(scope="session")
@@ -29,3 +29,15 @@ def test_draw_2(deck):
 def test_draw_deckout(deck):
     with pytest.raises(EmptyDeckError):
         deck.draw(len(deck) + 1)
+
+
+def test_stack(deck):
+    card = Card(name="foo")
+    deck.stack(card)
+    assert deck.draw(1).pop() == card
+
+
+def test_push(deck):
+    card = Card(name="foo")
+    deck.push(card)
+    assert deck.draw(len(deck)).pop() == card

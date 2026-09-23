@@ -66,7 +66,7 @@ class EmptyDeckError(Exception):
 
 
 class Deck(BaseModel):
-    cards: list[Card]
+    cards: list[Card] = Field(default_factory=list)
 
     def __len__(self) -> int:
         return len(self.cards)
@@ -91,3 +91,9 @@ class Deck(BaseModel):
         cards_drawn = self.cards[0:count]
         self.cards = self.cards[count:]
         return cards_drawn
+
+    def stack(self, card: Card):
+        self.cards.insert(0, card)
+
+    def push(self, card: Card):
+        self.cards.append(card)
