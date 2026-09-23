@@ -20,3 +20,10 @@ repos:
     args: [--select, I, --fix]
   - id: ruff-format
   - id: ruff-check
+- repo: local
+  hooks:
+  - id: ty
+    name: ty
+    entry: ty check
+    language: system
+    types: [python]
