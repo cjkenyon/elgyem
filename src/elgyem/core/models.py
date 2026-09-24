@@ -62,7 +62,7 @@ class EnergyType(StrEnum):
 class EnergyCard(Card):
     cost: list[Energy]
     type: EnergyType
-    text: str
+    text: str | None = None
 
 
 class EmptyDeckError(Exception):
@@ -83,6 +83,10 @@ class Deck(BaseModel):
             for line in lines:
                 cards.append(Card.model_validate_json(line))
         return cls(cards=cards)
+
+    def to_jsonl(self, path: str | Path):
+        with open(path, "w") as f:
+            f.writelines(card.model_dump_json() + "\n" for card in self.cards)
 
     def shuffle(self):
         random.shuffle(self.cards)
