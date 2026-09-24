@@ -1,19 +1,19 @@
 import random
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class Energy(Enum):
+class Energy(StrEnum):
     FIRE = "FIRE"
     WATER = "WATER"
     GRASS = "GRASS"
     COLORLESS = "COLORLESS"
 
 
-class Stage(Enum):
+class Stage(StrEnum):
     BASIC = "BASIC"
     STAGE_1 = "STAGE_1"
     STAGE_2 = "STAGE_2"
@@ -39,7 +39,7 @@ class PokemonCard(Card):
     retreat_cost: list[Energy]
 
 
-class TrainerType(Enum):
+class TrainerType(StrEnum):
     SUPPORTER = "SUPPORTER"
     ITEM = "ITEM"
     STADIUM = "STADIUM"
@@ -50,7 +50,7 @@ class TrainerCard(Card):
     type: TrainerType
 
 
-class EnergyType(Enum):
+class EnergyType(StrEnum):
     BASIC = "BASIC"
     SPECIAL = "SPECIAL"
 
@@ -158,3 +158,23 @@ class Player(BaseModel):
     prize_cards: PrizeCards = Field(default_factory=PrizeCards)
     bench: Bench = Field(default_factory=Bench)
     active: PokemonCard | None = None
+
+
+def _pair_of_players_factory() -> tuple[Player, Player]:
+    return (Player(), Player())
+
+
+class Phase(StrEnum):
+    SETUP = "SETUP"
+    DRAW = "DRAW"
+    MAIN = "MAIN"
+    ATTACK = "ATTACK"
+    CHECKUP = "CHECKUP"
+    GAME_OVER = "GAME_OVER"
+
+
+class Game(BaseModel):
+    players: tuple[Player, Player] = Field(default_factory=_pair_of_players_factory)
+    active_player: int = 0
+    turn: int = 0
+    phase: Phase = Phase.SETUP

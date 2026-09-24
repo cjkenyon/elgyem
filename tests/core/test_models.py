@@ -8,6 +8,7 @@ from elgyem.core.models import (
     CardDoesNotExist,
     Deck,
     EmptyDeckError,
+    Game,
     Hand,
     Player,
     PrizeCards,
@@ -105,3 +106,7 @@ def test_bench_push():
 
 def test_player_init():
     Player()
+
+
+def test_game_init():
+    Game()
