@@ -2,11 +2,13 @@ import pytest
 from pydantic import ValidationError
 
 from elgyem.core.models import (
+    Bench,
+    BenchFullError,
     Card,
+    CardDoesNotExist,
     Deck,
     EmptyDeckError,
     Hand,
-    PrizeDoesNotExist,
     Prizes,
 )
 
@@ -80,5 +82,21 @@ def test_prizes_pop():
     assert prizes.pop(0) == cards[0]
     assert len(prizes) == 5
     assert prizes.pop(4) == cards[5]
-    with pytest.raises(PrizeDoesNotExist):
+    with pytest.raises(CardDoesNotExist):
         prizes.pop(4)
+
+
+def test_bench_init():
+    bench = Bench()
+    assert len(bench) == 0
+
+
+def test_bench_push():
+    bench = Bench()
+    bench.push(Card(name="foo"))
+
+    for _ in range(4):
+        bench.push(Card(name="foo"))
+
+    with pytest.raises(BenchFullError):
+        bench.push(Card(name="foo"))

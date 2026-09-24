@@ -109,7 +109,7 @@ class Hand(BaseModel):
         self.cards.append(card)
 
 
-class PrizeDoesNotExist(Exception):
+class CardDoesNotExist(Exception):
     pass
 
 
@@ -123,4 +123,30 @@ class Prizes(BaseModel):
         try:
             return self.cards.pop(position)
         except IndexError:
-            raise PrizeDoesNotExist
+            raise CardDoesNotExist
+
+
+class BenchFullError(Exception):
+    pass
+
+
+DEFAULT_BENCH_SIZE: int = 5
+
+
+class Bench(BaseModel):
+    cards: list[Card] = Field(default_factory=list, max_length=DEFAULT_BENCH_SIZE)
+
+    def __len__(self) -> int:
+        return len(self.cards)
+
+    def push(self, card: Card):
+        if len(self) >= DEFAULT_BENCH_SIZE:
+            raise BenchFullError
+
+        self.cards.append(card)
+
+    def pop(self, position: int) -> Card:
+        try:
+            return self.cards.pop(position)
+        except IndexError:
+            raise CardDoesNotExist
