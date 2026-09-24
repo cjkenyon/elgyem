@@ -97,3 +97,30 @@ class Deck(BaseModel):
 
     def push(self, card: Card):
         self.cards.append(card)
+
+
+class Hand(BaseModel):
+    cards: list[Card] = Field(default_factory=list)
+
+    def __len__(self) -> int:
+        return len(self.cards)
+
+    def push(self, card: Card):
+        self.cards.append(card)
+
+
+class PrizeDoesNotExist(Exception):
+    pass
+
+
+class Prizes(BaseModel):
+    cards: list[Card] = Field(default_factory=list, max_length=6)
+
+    def __len__(self) -> int:
+        return len(self.cards)
+
+    def pop(self, position: int) -> Card:
+        try:
+            return self.cards.pop(position)
+        except IndexError:
+            raise PrizeDoesNotExist
