@@ -1,6 +1,8 @@
+import json
 import random
 from enum import StrEnum
 from pathlib import Path
+from typing import Literal
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
@@ -34,6 +36,8 @@ class Card(BaseModel):
 
 
 class PokemonCard(Card):
+    card_type: Literal["pokemon"] = "pokemon"
+
     hp: int
     type: Energy
     stage: Stage
@@ -50,6 +54,8 @@ class TrainerType(StrEnum):
 
 
 class TrainerCard(Card):
+    card_type: Literal["trainer"] = "trainer"
+
     text: str
     type: TrainerType
 
@@ -60,6 +66,7 @@ class EnergyType(StrEnum):
 
 
 class EnergyCard(Card):
+    card_type: Literal["energy"] = "energy"
     cost: list[Energy]
     type: EnergyType
     text: str | None = None
@@ -67,6 +74,13 @@ class EnergyCard(Card):
 
 class EmptyDeckError(Exception):
     pass
+
+
+CARD_TYPE = {
+    "pokemon": PokemonCard,
+    "trainer": TrainerCard,
+    "energy": EnergyCard,
+}
 
 
 class Deck(BaseModel):
@@ -81,7 +95,9 @@ class Deck(BaseModel):
         with open(path) as f:
             lines = f.readlines()
             for line in lines:
-                cards.append(Card.model_validate_json(line))
+                data = json.loads(line)
+                card_type = data.pop("card_type")
+                cards.append(CARD_TYPE[card_type].model_validate_json(line))
         return cls(cards=cards)
 
     def to_jsonl(self, path: str | Path):

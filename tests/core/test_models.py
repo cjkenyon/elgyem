@@ -14,39 +14,39 @@ from elgyem.core.models import (
 )
 
 
-def test_shuffle(full_deck):
-    before = full_deck.cards.copy()
-    full_deck.shuffle()
-    assert before != full_deck.cards
+def test_shuffle(dreepy_deck):
+    before = dreepy_deck.cards.copy()
+    dreepy_deck.shuffle()
+    assert before != dreepy_deck.cards
 
 
-def test_draw_1(full_deck):
-    before = len(full_deck)
-    assert len(full_deck.draw(1)) == 1
-    assert len(full_deck) == before - 1
+def test_draw_1(dreepy_deck):
+    before = len(dreepy_deck)
+    assert len(dreepy_deck.draw(1)) == 1
+    assert len(dreepy_deck) == before - 1
 
 
-def test_draw_2(full_deck):
-    before = len(full_deck)
-    assert len(full_deck.draw(2)) == 2
-    assert len(full_deck) == before - 2
+def test_draw_2(dreepy_deck):
+    before = len(dreepy_deck)
+    assert len(dreepy_deck.draw(2)) == 2
+    assert len(dreepy_deck) == before - 2
 
 
-def test_draw_full_deckout(full_deck):
+def test_draw_dreepy_deckout(dreepy_deck):
     with pytest.raises(EmptyDeckError):
-        full_deck.draw(len(full_deck) + 1)
+        dreepy_deck.draw(len(dreepy_deck) + 1)
 
 
-def test_full_deck_stack(full_deck):
+def test_dreepy_deck_stack(dreepy_deck):
     card = Card(name="foo")
-    full_deck.stack(card)
-    assert full_deck.draw(1).pop() == card
+    dreepy_deck.stack(card)
+    assert dreepy_deck.draw(1).pop() == card
 
 
-def test_full_deck_push(full_deck):
+def test_dreepy_deck_push(dreepy_deck):
     card = Card(name="foo")
-    full_deck.push(card)
-    assert full_deck.draw(len(full_deck)).pop() == card
+    dreepy_deck.push(card)
+    assert dreepy_deck.draw(len(dreepy_deck)).pop() == card
 
 
 def test_hand_push():

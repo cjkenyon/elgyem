@@ -9,6 +9,11 @@ def full_deck():
     return Deck.from_jsonl("./tests/data/fire_deck.jsonl")
 
 
+@pytest.fixture(scope="session")
+def dreepy_deck():
+    return Deck.from_jsonl("./tests/data/dreepy_deck.jsonl")
+
+
 @pytest.fixture(scope="function")
 def empty_hand():
     return Hand()
