@@ -5,8 +5,7 @@ from elgyem.core.models import (
     Bench,
     BenchFullError,
     Card,
-    CardDoesNotExist,
-    Deck,
+    CardNotFound,
     EmptyDeckError,
     Game,
     Hand,
@@ -15,44 +14,39 @@ from elgyem.core.models import (
 )
 
 
-@pytest.fixture(scope="session")
-def deck():
-    return Deck.from_jsonl("./tests/data/fire_deck.jsonl")
+def test_shuffle(full_deck):
+    before = full_deck.cards.copy()
+    full_deck.shuffle()
+    assert before != full_deck.cards
 
 
-def test_shuffle(deck):
-    before = deck.cards.copy()
-    deck.shuffle()
-    assert before != deck.cards
+def test_draw_1(full_deck):
+    before = len(full_deck)
+    assert len(full_deck.draw(1)) == 1
+    assert len(full_deck) == before - 1
 
 
-def test_draw_1(deck):
-    before = len(deck)
-    assert len(deck.draw(1)) == 1
-    assert len(deck) == before - 1
+def test_draw_2(full_deck):
+    before = len(full_deck)
+    assert len(full_deck.draw(2)) == 2
+    assert len(full_deck) == before - 2
 
 
-def test_draw_2(deck):
-    before = len(deck)
-    assert len(deck.draw(2)) == 2
-    assert len(deck) == before - 2
-
-
-def test_draw_deckout(deck):
+def test_draw_full_deckout(full_deck):
     with pytest.raises(EmptyDeckError):
-        deck.draw(len(deck) + 1)
+        full_deck.draw(len(full_deck) + 1)
 
 
-def test_deck_stack(deck):
+def test_full_deck_stack(full_deck):
     card = Card(name="foo")
-    deck.stack(card)
-    assert deck.draw(1).pop() == card
+    full_deck.stack(card)
+    assert full_deck.draw(1).pop() == card
 
 
-def test_deck_push(deck):
+def test_full_deck_push(full_deck):
     card = Card(name="foo")
-    deck.push(card)
-    assert deck.draw(len(deck)).pop() == card
+    full_deck.push(card)
+    assert full_deck.draw(len(full_deck)).pop() == card
 
 
 def test_hand_push():
@@ -84,7 +78,7 @@ def test_prizes_pop():
     assert prizes.pop(0) == cards[0]
     assert len(prizes) == 5
     assert prizes.pop(4) == cards[5]
-    with pytest.raises(CardDoesNotExist):
+    with pytest.raises(CardNotFound):
         prizes.pop(4)
 
 

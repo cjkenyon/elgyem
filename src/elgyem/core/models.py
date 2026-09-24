@@ -8,8 +8,10 @@ from pydantic import BaseModel, Field
 
 class Energy(StrEnum):
     FIRE = "FIRE"
+    PSYCHIC = "PSYCHIC"
     WATER = "WATER"
     GRASS = "GRASS"
+    DRAGON = "DRAGON"
     COLORLESS = "COLORLESS"
 
 
@@ -22,12 +24,12 @@ class Stage(StrEnum):
 class Attack(BaseModel):
     name: str
     cost: list[Energy]
-    text: str
+    text: str | None = None
     damage: int
 
 
 class Card(BaseModel):
-    uid: UUID = Field(default_factory=uuid4)
+    uuid: UUID = Field(default_factory=uuid4)
     name: str
 
 
@@ -37,6 +39,8 @@ class PokemonCard(Card):
     stage: Stage
     attacks: list[Attack]
     retreat_cost: list[Energy]
+    weakness: Energy | None = None
+    resistance: Energy | None = None
 
 
 class TrainerType(StrEnum):
@@ -108,8 +112,20 @@ class Hand(BaseModel):
     def push(self, card: Card):
         self.cards.append(card)
 
+    def peek(self, uuid: UUID) -> Card:
+        for card in self.cards:
+            if card.uuid == uuid:
+                return card
+        raise CardNotFound
 
-class CardDoesNotExist(Exception):
+    def remove(self, uuid: UUID) -> Card:
+        for i, card in enumerate(self.cards):
+            if card.uuid == uuid:
+                return self.cards.pop(i)
+        raise CardNotFound
+
+
+class CardNotFound(Exception):
     pass
 
 
@@ -123,7 +139,7 @@ class PrizeCards(BaseModel):
         try:
             return self.cards.pop(position)
         except IndexError:
-            raise CardDoesNotExist
+            raise CardNotFound
 
 
 class BenchFullError(Exception):
@@ -149,10 +165,11 @@ class Bench(BaseModel):
         try:
             return self.cards.pop(position)
         except IndexError:
-            raise CardDoesNotExist
+            raise CardNotFound
 
 
 class Player(BaseModel):
+    uuid: UUID = Field(default_factory=uuid4)
     deck: Deck = Field(default_factory=Deck)
     hand: Hand = Field(default_factory=Hand)
     prize_cards: PrizeCards = Field(default_factory=PrizeCards)
@@ -173,8 +190,22 @@ class Phase(StrEnum):
     GAME_OVER = "GAME_OVER"
 
 
+class PlayerNotFound(Exception):
+    pass
+
+
 class Game(BaseModel):
     players: tuple[Player, Player] = Field(default_factory=_pair_of_players_factory)
     active_player: int = 0
     turn: int = 0
     phase: Phase = Phase.SETUP
+
+    def get_current_player(self) -> Player:
+        return self.players[self.active_player]
+
+    def get_player(self, uuid: UUID) -> Player:
+        for player in self.players:
+            if uuid == player.uuid:
+                return player
+
+        raise PlayerNotFound
