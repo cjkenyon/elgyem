@@ -113,7 +113,7 @@ class CardDoesNotExist(Exception):
     pass
 
 
-class Prizes(BaseModel):
+class PrizeCards(BaseModel):
     cards: list[Card] = Field(default_factory=list, max_length=6)
 
     def __len__(self) -> int:
@@ -150,3 +150,11 @@ class Bench(BaseModel):
             return self.cards.pop(position)
         except IndexError:
             raise CardDoesNotExist
+
+
+class Player(BaseModel):
+    deck: Deck = Field(default_factory=Deck)
+    hand: Hand = Field(default_factory=Hand)
+    prize_cards: PrizeCards = Field(default_factory=PrizeCards)
+    bench: Bench = Field(default_factory=Bench)
+    active: PokemonCard | None = None

@@ -9,7 +9,8 @@ from elgyem.core.models import (
     Deck,
     EmptyDeckError,
     Hand,
-    Prizes,
+    Player,
+    PrizeCards,
 )
 
 
@@ -61,23 +62,23 @@ def test_hand_push():
 
 
 def test_prizes_init():
-    prizes = Prizes()
+    prizes = PrizeCards()
     assert len(prizes) == 0
 
 
 def test_prizes_init_with_greater_than_6_cards():
     with pytest.raises(ValidationError):
-        Prizes(cards=[Card(name="foo")] * 7)
+        PrizeCards(cards=[Card(name="foo")] * 7)
 
 
 def test_prizes_init_with_greater():
     with pytest.raises(ValidationError):
-        Prizes(cards=[Card(name="foo")] * 7)
+        PrizeCards(cards=[Card(name="foo")] * 7)
 
 
 def test_prizes_pop():
     cards = [Card(name="foo")] * 6
-    prizes = Prizes(cards=cards)
+    prizes = PrizeCards(cards=cards)
 
     assert prizes.pop(0) == cards[0]
     assert len(prizes) == 5
@@ -100,3 +101,7 @@ def test_bench_push():
 
     with pytest.raises(BenchFullError):
         bench.push(Card(name="foo"))
+
+
+def test_player_init():
+    Player()
