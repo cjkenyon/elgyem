@@ -132,6 +132,9 @@ class Hand(BaseModel):
     def push(self, card: Card):
         self.cards.append(card)
 
+    def pop(self, index: int = 0):
+        return self.cards.pop(index)
+
     def peek(self, uuid: UUID) -> Card:
         for card in self.cards:
             if card.uuid == uuid:
@@ -195,6 +198,7 @@ class Player(BaseModel):
     prize_cards: PrizeCards = Field(default_factory=PrizeCards)
     bench: Bench = Field(default_factory=Bench)
     active: PokemonCard | None = None
+    mulligans: int = 0
 
 
 def _pair_of_players_factory() -> tuple[Player, Player]:
@@ -210,6 +214,13 @@ class Phase(StrEnum):
     GAME_OVER = "GAME_OVER"
 
 
+class SetupStep(StrEnum):
+    DRAW_HAND = "DRAW_HAND"
+    CHOOSE_ACTIVE = "CHOOSE_ACTIVE"
+    CHOOSE_BENCH = "CHOOSE_BENCH"
+    COMPLETE = "COMPLETE"
+
+
 class PlayerNotFound(Exception):
     pass
 
@@ -219,6 +230,7 @@ class Game(BaseModel):
     active_player: int = 0
     turn: int = 0
     phase: Phase = Phase.SETUP
+    setup_step: SetupStep = SetupStep.DRAW_HAND
 
     def get_current_player(self) -> Player:
         return self.players[self.active_player]
@@ -229,3 +241,10 @@ class Game(BaseModel):
                 return player
 
         raise PlayerNotFound
+
+
+def build_game(deck_a, deck_b) -> Game:
+    game = Game()
+    game.players[0].deck = deck_a
+    game.players[1].deck = deck_b
+    return game

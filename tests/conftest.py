@@ -1,7 +1,15 @@
 import pytest
 
 from elgyem.core.engine import Engine
-from elgyem.core.models import Attack, Deck, Energy, Game, Hand, PokemonCard, Stage
+from elgyem.core.models import (
+    Attack,
+    Deck,
+    Energy,
+    Hand,
+    PokemonCard,
+    Stage,
+    build_game,
+)
 
 
 @pytest.fixture(scope="session")
@@ -20,8 +28,8 @@ def empty_hand():
 
 
 @pytest.fixture(scope="function")
-def new_game():
-    return Game()
+def new_game(dreepy_deck):
+    return build_game(dreepy_deck, dreepy_deck.model_copy(deep=True))
 
 
 @pytest.fixture(scope="session")

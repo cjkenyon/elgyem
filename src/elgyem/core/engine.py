@@ -1,8 +1,13 @@
 from elgyem.core.actions import Action, ChooseActiveFromHand
-from elgyem.core.models import CardNotFound, Game, PokemonCard, Stage
+from elgyem.core.models import CardNotFound, Game, Phase, PokemonCard, SetupStep, Stage
+from elgyem.core.rules import STARTING_HAND_SIZE
 
 
 class InvalidAction(Exception):
+    pass
+
+
+class InvalidPhase(Exception):
     pass
 
 
@@ -10,15 +15,41 @@ class Engine:
     def __init__(self):
         pass
 
-    def execute(self, game: Game, action: Action) -> Game:
-        new_game_state = game.model_copy(deep=True)
+    def setup(self, game: Game) -> Game:
+        if game.phase != Phase.SETUP:
+            raise InvalidPhase("The game must be in the setup phase to call setup.")
 
+        for player in game.players:
+            has_basic = False
+            mulligans = 0
+            while True:
+                player.deck.shuffle()
+                for card in player.deck.draw(STARTING_HAND_SIZE):
+                    print(card)
+                    print(isinstance(card, PokemonCard))
+                    if isinstance(card, PokemonCard) and card.stage == Stage.BASIC:
+                        has_basic = True
+                    player.hand.push(card)
+
+                if has_basic:
+                    break
+                mulligans += 1
+
+                while len(player.hand) > 0:
+                    player.deck.stack(player.hand.pop())
+
+            player.mulligans = mulligans
+
+        game.setup_step = SetupStep.CHOOSE_ACTIVE
+        return game
+
+    def execute(self, game: Game, action: Action) -> Game:
         if game.get_current_player().uuid != action.player:
             raise InvalidAction
 
         match action:
             case ChooseActiveFromHand():
-                return self._choose_active_from_hand(new_game_state, action)
+                return self._choose_active_from_hand(game, action)
             case _:
                 raise InvalidAction
 
